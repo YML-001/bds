@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>班导师模块原型 - 移动端</title>
+  <link rel="stylesheet" href="css/mobile.css" />
+</head>
+<body>
+  <div id="app" v-cloak></div>
+
+  <script src="lib/vue.global.prod.js"></script>
+
+  <!-- 数据层与 PC 端共用：字典 → 角色 → 种子 → 存储 -->
+  <script src="js/mock/dict.js"></script>
+  <script src="js/mock/roles.js"></script>
+  <script src="js/mock/seed.js"></script>
+  <script src="js/mock/store.js"></script>
+
+  <script src="js/mobile/data.js"></script>
+  <script src="js/mobile/pages.js"></script>
+  <script>window.mountMobile();</script>
+</body>
+</html>

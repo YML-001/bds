@@ -1,0 +1,12 @@
+# local tooling and dependencies
+node_modules/
+.playwright-cli/
+
+# secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+id_rsa
+id_ed25519
