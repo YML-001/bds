@@ -226,6 +226,8 @@ body {
 .st-chip--warning { color: #ff9800; background: #fcf6e8; }
 .st-chip--muted { color: #696f7d; background: #f2f2f2; }
 .st-chip--danger { color: #eb5757; background: #fce8e8; }
+.bds-detail { padding: 0 16px 88px; }
+.info-tip { margin: 4px 0 0; font-size: 13px; line-height: 1.6; color: #b26a00; background: #fff6e6; border: 1px solid #ffe0a8; border-radius: 10px; padding: 8px 12px; }
 .detail-foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 70; display: flex; gap: 12px; padding: 10px 16px 18px; background: #fff; box-shadow: 0 -4px 12px rgba(0, 87, 240, .06); }
 .foot-btn { flex: 1; height: 40px; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
 .foot-btn--ghost { border: 1px solid #0057f0; color: #0057f0; }

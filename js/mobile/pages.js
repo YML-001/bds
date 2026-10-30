@@ -2,7 +2,7 @@
  * 移动端页面（znzhxgpt-uni）：
  *   #/home      首页（校领导首页·学工队伍板块：队伍总体情况 cardTeam / 优秀班导师 cardTutor）
  *   #/drill     下钻名单 pages/home/fdyDrill.vue（scope=xgdw 学工队伍 / scope=xsrs 我带班学生名单）
- *   #/fdydetail 教职工详情长页 ywViews/fdydwjs/fdydetail.vue（rylx=4 班导师）
+ *   #/fdydetail 班导师详情（与 PC 名单详情同一套：基本信息 + 历年带班）
  *   #/xsxq      学生详情 pages/home/xsxq.vue（个人信息·基本信息含班导师姓名/工号/电话）
  *   #/my        我的 pages/my/teacher.vue（我的档案、切换角色）
  */
@@ -317,246 +317,81 @@
       </div>`,
   };
 
-  /* ---------------- 教职工详情长页 fdydetail ---------------- */
-  const DETAIL_ANCHORS = [
-    { key: 'base', label: '基本情况' }, { key: 'grxx', label: '个人信息' }, { key: 'pxxf', label: '研修学分' },
-    { key: 'xycz', label: '学业成长' }, { key: 'zyfz', label: '职业发展' }, { key: 'xxpx', label: '学习培训' },
-    { key: 'zyzg', label: '职业资格' }, { key: 'gwdl', label: '岗位锻炼' }, { key: 'jxky', label: '教学科研' },
-    { key: 'khpj', label: '考核评价' }, { key: 'jljc', label: '奖励表彰' }, { key: 'gzjs', label: '工作纪实' },
-    { key: 'dbb', label: '带班信息' }, { key: 'xgrz', label: '学工日志' }, { key: 'czrz', label: '操作日志' },
-  ];
-  const JBXX_ROWS = [['姓名', 'xm'], ['性别', 'xb'], ['出生年月', 'csrq'], ['民族', 'mz'], ['政治面貌', 'zzmm'], ['身份证件号', 'sfzh'], ['婚姻状况', 'hyzk'], ['生育状况', 'syzk']];
-  const zggxxRows = r => [
-    ['专业技术职务', 'zyjszw'], ['参加工作时间', 'cjgzsj'], ['岗位任职时间', 'drfdysj'], ['岗位性质', 'gwxz'],
-    [`是否为少数民族学生专职${r}`, 'sfwssmzfdy'], ['学校名称', 'xxmc'], ['二级单位', 'ejdw'], ['二级单位类别', 'ejdwlb'],
-    ['行政职务', 'zw'], ['行政职务等级', 'zwdj'], [`是否为国际学生${r}`, 'sfwgjxsfdy'], [`是否为毕业班${r}`, 'sfwbybfdy'],
-    ['带学生情况', 'dxsqk'], ['带专科生人数', 'dzksrs', '人'], ['带本科生人数', 'dbksrs', '人'], ['带研究生人数', 'dyjsrs', '人'],
-    ['带国际学生人数', 'dgjxsrs', '人'], ['聘用关系', 'pygx'], ['年收入', 'nsr', '元'], [`年度${r}岗位津贴`, 'ndfdygwjt', '元'],
-    ['年度通讯补贴', 'ndtxbt', '元'], ['是否入职学生宿舍', 'sfrzxsss'],
-  ];
-  const XLXW_ROWS = [['最高学历', 'zgxl'], ['毕业院校', 'byyx'], ['专业', 'zymc'], ['最后学位', 'zhxw'], ['学位授予院校', 'xwsyyx'], ['学位类别', 'xylb'], ['博士后经历', 'bshjl'], ['档案存放处', 'dacfc']];
-  const LXXX_ROWS = [['办公电话', 'bghm'], ['电子邮箱', 'yx'], ['手机号码', 'lxdh'], ['微信账号', 'wxzh'], ['QQ号码', 'qqhm'], ['邮编', 'yb'], ['通讯地址', 'txdz']];
-  const DBB_ROWS = [['班级类型', 'bjlxText'], ['年级', 'nj'], ['专业名称', 'zymc'], ['所在学院', 'xymc'], ['学生人数', 'xsrs'], ['班导师', 'bdsxm'], ['学年', 'xn'], ['起止时间', 'qzsj']];
-  const XGRZ_TABS = [{ label: '本周', value: '1' }, { label: '本月', value: '2' }, { label: '本学期', value: '3' }];
-  const XGRZ_ITEMS = [
-    { label: '宿舍查寝', key: 'sscq', tone: 'cyan', ic: '寝' }, { label: '学习查课', key: 'xxck', tone: 'red', ic: '课' },
-    { label: '考试巡考', key: 'ksxk', tone: 'green', ic: '考' }, { label: '谈心谈话', key: 'txth', tone: 'blue', ic: '谈' },
-    { label: '家校沟通', key: 'jxgt', tone: 'orange', ic: '家' }, { label: '学工会议', key: 'xghy', tone: 'cyan', ic: '会' },
-    { label: '信息急报', key: 'xxjb', tone: 'steel', ic: '报' },
-  ];
-  const EMPTY_SECTIONS = [
-    { key: 'pxxf', title: '培训研修学分', empty: () => '暂无培训研修学分记录' },
-    { key: 'xycz', title: '学业成长', empty: () => '暂无学业成长记录' },
-    { key: 'zyfz', title: '职业发展', tabs: ['行政职业发展', '专业技术职务发展', '工作履历'], empty: t => `暂无${t}记录` },
-    { key: 'xxpx', title: '学习培训', tabs: ['培训', '研修深造'], empty: t => `暂无${t}记录` },
-    { key: 'zyzg', title: '职业资格', empty: () => '暂无职业资格记录' },
-    { key: 'gwdl', title: '岗位锻炼', empty: () => '暂无岗位锻炼记录' },
-    { key: 'jxky', title: '教学科研', tabs: ['教学情况', '工作室建设', '论文', '项目', '著作', '软件著作', '其他'], empty: t => `暂无${t}记录` },
-    { key: 'khpj', title: '考核评价', tabs: ['学校年度考核结果', '工作自评'], empty: t => (t === '工作自评' ? '该辅导员暂未提交工作自评' : '暂无学校年度考核结果') },
-    { key: 'jljc', title: '奖励表彰', tabs: ['个人荣誉', '集体、班级荣誉', '所带学生荣誉'], empty: t => `暂无${t}记录` },
-    { key: 'gzjs', title: '工作纪实', empty: () => '暂无工作纪实记录' },
-  ];
-  const REC_LIMIT = 5;
-  const shztMeta = s => {
-    s = String(s == null ? '' : s);
-    if (s === '1') return { label: '已通过', tone: 'success' };
-    if (s === '2') return { label: '拒绝', tone: 'danger' };
-    if (s === '3') return { label: '无需审核', tone: 'muted' };
-    return { label: '待审核', tone: 'warning' };
-  };
+  /* ---------------- 班导师详情：与 PC 名单「详情」同一套字段 ---------------- */
+  function detailCells(d) {
+    d = d || {};
+    const dash = v => (v === undefined || v === null || String(v).trim() === '' ? '-' : String(v));
+    const xjqnjsLabel = v => (String(v) === '1' ? '是' : (String(v) === '0' ? '否' : '-'));
+    return [
+      ['工号', dash(d.gh)], ['姓名', dash(d.xm)], ['性别', window.dictLabel('xb', d.xb)], ['民族', dash(d.mz)],
+      ['学院', dash(d.szxy)], ['学历(位)', dash(d.xlw)], ['类别', window.dictLabel('lb', d.lb)], ['职称', dash(d.zc)],
+      ['出国深造', window.dictLabel('sfygcszjl', d.sfygcszjl)], ['工作单位', dash(d.gzdw)], ['联系电话', dash(d.lxdh)], ['新进青年教师', xjqnjsLabel(d.xjqnjs)],
+      ['青年教师类型', window.dictLabel('xjqnjslx', d.xjqnjslx)], ['带班数量', dash(d.dbsl)], ['来源', d.ly === 'sdlr' ? '手动录入' : '教职工库'], ['带班班级', dash(d.bjTenure || d.bjmcs)], ['备注', dash(d.bz)],
+    ];
+  }
 
   const MFdyDetail = {
     props: { query: Object },
-    data() {
-      const tabs = {};
-      EMPTY_SECTIONS.forEach(s => { if (s.tabs) tabs[s.key] = s.tabs[0]; });
-      return { DETAIL_ANCHORS, XGRZ_TABS, XGRZ_ITEMS, DBB_ROWS, EMPTY_SECTIONS, tabs, xgrzTab: '1', active: 'base', dbbAll: false, locking: false };
-    },
     computed: {
       gh() { return this.query.gh || S.role().gh; },
-      roleName() { return String(this.query.rylx) === '4' ? '班导师' : '辅导员'; },
-      p() { return M.profile(this.gh); },
-      status() { return this.p.dqzt === '1' ? { label: '病假', tone: 'warning' } : { label: '在岗', tone: 'success' }; },
-      grxxCards() {
-        return [
-          { title: '基本信息', rows: JBXX_ROWS },
-          { title: '政工信息', rows: zggxxRows(this.roleName) },
-          { title: '学历学位信息', rows: XLXW_ROWS },
-          { title: '联系信息', rows: LXXX_ROWS },
-        ];
+      row() {
+        const b = (S.state.bds || []).find(x => x.gh === this.gh);
+        return b ? S.bdsView(b) : null;
       },
-      dbbShown() { return this.dbbAll ? this.p.dbbList : this.p.dbbList.slice(0, REC_LIMIT); },
-      xgrz() { return M.xgrzStats(this.gh, this.xgrzTab); },
-      czrz() { return M.czrzList(this.gh); },
+      cells() { return this.row ? detailCells(this.row) : []; },
+      rzRows() { return this.row ? S.rzRows(this.row.gh) : []; },
+      selfView() { return this.gh === S.role().gh && S.role().key === 'bds'; },
     },
     methods: {
-      val(row) {
-        const v = this.p[row[1]];
-        if (v === undefined || v === null || String(v).trim() === '') return '—';
-        return row[2] ? v + ' ' + row[2] : String(v);
+      cert() {
+        if (!this.row || !window.downloadBdsCert) { window.mtoast('导出证明失败'); return; }
+        try { window.downloadBdsCert(this.row); window.mtoast('已下载班导师证明'); }
+        catch (e) { window.mtoast('导出证明失败'); }
       },
-      goAnchor(key) {
-        const el = this.$el.querySelector('#sec-' + key);
-        if (!el || !this.$scroller) return;
-        this.active = key;
-        this.locking = true;
-        this.$scroller.scrollTo({ top: key === 'base' ? 0 : el.offsetTop - 46, behavior: 'smooth' });
-        clearTimeout(this.$lockT);
-        this.$lockT = setTimeout(() => { this.locking = false; }, 600);
-      },
-      onScroll() {
-        if (this.locking) return;
-        const top = this.$scroller.scrollTop + 60;
-        let cur = 'base';
-        DETAIL_ANCHORS.forEach(a => {
-          const el = this.$el.querySelector('#sec-' + a.key);
-          if (el && el.offsetTop <= top) cur = a.key;
-        });
-        this.active = cur;
-      },
-      centerAnchor() {
-        const bar = this.$el.querySelector('.anchor-bar');
-        const it = this.$el.querySelector('#anchor-' + this.active);
-        if (bar && it) bar.scrollTo({ left: it.offsetLeft - bar.clientWidth / 2 + it.clientWidth / 2, behavior: 'smooth' });
-      },
-      backToTop() { this.$scroller && this.$scroller.scrollTo({ top: 0, behavior: 'smooth' }); },
-      goStudents(row) { window.mgo('/drill', { scope: 'xsrs', bjbh: row.bjbh }); },
-      shztMeta,
-      reviewerLine(r) { return [r.shrr ? r.shrr + ' 审核' : '', r.shsj || ''].filter(Boolean).join(' '); },
       back: window.mback,
-      ...helpers,
     },
-    watch: { active() { this.centerAnchor(); }, gh() { this.active = 'base'; } },
-    mounted() {
-      this.$scroller = this.$el.closest('.page');
-      this.$onScroll = () => this.onScroll();
-      this.$scroller.addEventListener('scroll', this.$onScroll);
-    },
-    beforeUnmount() { this.$scroller.removeEventListener('scroll', this.$onScroll); },
     template: `
-      <div class="fdyxq">
-        <div class="anchor-bar">
-          <div class="anchor-row">
-            <div v-for="(a, i) in DETAIL_ANCHORS" :id="'anchor-' + a.key" :key="a.key" class="anchor" :class="{ 'anchor--sep': i > 0 }" @click="goAnchor(a.key)">
-              <span class="anchor__txt" :class="{ 'anchor__txt--on': active === a.key }">{{ a.label }}</span>
-              <span class="anchor__bar" :class="{ 'anchor__bar--on': active === a.key }"></span>
-            </div>
-          </div>
-        </div>
-        <div class="fdyxq__inner">
-          <div id="sec-base"></div>
-          <div class="head-card">
-            <div class="head-card__top">
-              <div class="avatar" :class="avatarCls(p.xbCode)">{{ (p.xm || '?').slice(0, 1) }}</div>
-              <div class="head-ident">
-                <div class="head-ident__line">
-                  <span class="head-name">{{ p.xm || '-' }}</span>
-                  <span class="stu-card__xh"><span class="cap">🎓</span>{{ gh || '-' }}</span>
-                  <span v-if="genderTxt(p.xbCode)" class="gender" :class="genderCls(p.xbCode)">{{ genderTxt(p.xbCode) }}</span>
-                </div>
-                <div class="head-meta">
-                  <span v-if="p.gwxz" class="head-tag">{{ p.gwxz }}</span>
-                  <span v-if="p.gwxz && p.zgxl" class="head-meta__sep"></span>
-                  <span v-if="p.zgxl">{{ p.zgxl }}</span>
-                  <span class="head-meta__sep"></span>
-                  <span>带班<span class="head-meta__num"> {{ p.dbbList.length }}</span></span>
-                </div>
-              </div>
-              <div class="stamp" :class="'stamp--' + status.tone"><span class="stamp__txt">{{ status.label }}</span></div>
-            </div>
-            <div class="head-grid">
-              <div class="grid-cell"><span class="grid-cell__label">所在部门</span><span class="grid-cell__value">{{ dash(p.szbm) }}</span></div>
-              <div class="grid-row">
-                <div class="grid-cell"><span class="grid-cell__label">行政职务</span><span class="grid-cell__value">{{ dash(p.zw) }}</span></div>
-                <div class="grid-cell"><span class="grid-cell__label">岗位任职时间</span><span class="grid-cell__value">{{ dash(p.drfdysj) }}</span></div>
-              </div>
-              <div class="grid-row">
-                <div class="grid-cell"><span class="grid-cell__label">联系电话</span><span class="grid-cell__value">{{ dash(p.lxdh) }}</span></div>
-                <div class="grid-cell"><span class="grid-cell__label">更新时间</span><span class="grid-cell__value">{{ dash(p.latestXgsj) }}</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="sec-grxx" class="section">
-            <div class="section__head"><span class="section__title">个人信息</span><span class="section__bar"></span></div>
-            <div v-for="card in grxxCards" :key="card.title" class="info-card">
-              <div class="info-card__head"><span class="info-card__mark"></span><span class="info-card__title">{{ card.title }}</span></div>
+      <div class="bds-detail">
+        <div v-if="selfView" class="info-tip">班导师不能维护本人资料，如需更正请联系辅导员或学院班导师专干。</div>
+        <template v-if="row">
+          <div class="section">
+            <div class="section__head"><span class="section__title">基本信息</span><span class="section__bar"></span></div>
+            <div class="info-card">
               <div class="info-card__body">
-                <div v-for="row in card.rows" :key="row[1]" class="info-row"><span class="info-row__label">{{ row[0] }}</span><span class="info-row__value">{{ val(row) }}</span></div>
+                <div v-for="c in cells" :key="c[0]" class="info-row"><span class="info-row__label">{{ c[0] }}</span><span class="info-row__value">{{ c[1] }}</span></div>
               </div>
             </div>
           </div>
-
-          <div v-for="sec in EMPTY_SECTIONS" :id="'sec-' + sec.key" :key="sec.key" class="section">
-            <div class="section__head"><span class="section__title">{{ sec.title }}</span><span class="section__bar"></span></div>
-            <div v-if="sec.tabs" class="chip-tabs">
-              <span v-for="t in sec.tabs" :key="t" class="chip-tab" :class="{ 'chip-tab--on': tabs[sec.key] === t }" @click="tabs[sec.key] = t">{{ t }}</span>
-            </div>
-            <div class="empty-card">{{ sec.empty(tabs[sec.key]) }}</div>
-          </div>
-
-          <div id="sec-dbb" class="section">
+          <div class="section">
             <div class="sec-head">
-              <div class="section__head"><span class="section__title">带班信息</span><span class="section__bar"></span></div>
-              <div v-if="p.dbbList.length" class="count-chip">共&nbsp;<span class="count-chip__num">{{ p.dbbList.length }}</span>&nbsp;条</div>
+              <div class="section__head"><span class="section__title">历年带班</span><span class="section__bar"></span></div>
+              <div v-if="rzRows.length" class="count-chip">共&nbsp;<span class="count-chip__num">{{ rzRows.length }}</span>&nbsp;条</div>
             </div>
-            <div v-if="!p.dbbList.length" class="empty-card">暂无带班信息</div>
-            <div v-for="(row, i) in dbbShown" :key="row.bjbh" class="rec-card">
+            <div v-if="!rzRows.length" class="empty-card">暂无带班履历</div>
+            <div v-for="(r, i) in rzRows" :key="i" class="rec-card">
               <div class="rec-card__head">
                 <span class="idx-badge">{{ i + 1 }}</span>
-                <span class="rec-card__title">{{ row.bjmc || '未填班级名称' }}</span>
-                <span class="rec-card__link" @click="goStudents(row)">学生名单 ›</span>
+                <span class="rec-card__title">{{ r.bjmc }}</span>
+                <span class="st-chip" :class="r.zt === '在任' ? 'st-chip--success' : 'st-chip--muted'">{{ r.zt }}</span>
               </div>
               <div class="rec-card__body">
-                <div v-for="f in DBB_ROWS" :key="f[1]" class="info-row"><span class="info-row__label">{{ f[0] }}</span><span class="info-row__value">{{ dash(row[f[1]]) }}</span></div>
-              </div>
-            </div>
-            <div v-if="!dbbAll && p.dbbList.length > 5" class="more-btn" @click="dbbAll = true">查看全部 ›</div>
-          </div>
-
-          <div id="sec-xgrz" class="section">
-            <div class="section__head"><span class="section__title">学工日志</span><span class="section__bar"></span></div>
-            <div class="chip-tabs">
-              <span v-for="t in XGRZ_TABS" :key="t.value" class="chip-tab" :class="{ 'chip-tab--on': xgrzTab === t.value }" @click="xgrzTab = t.value">{{ t.label }}</span>
-            </div>
-            <div class="statgrid">
-              <div v-for="it in XGRZ_ITEMS" :key="it.key" class="statcell">
-                <div class="statcell__ic" :class="'statcell__ic--' + it.tone">{{ it.ic }}</div>
-                <div><div class="statcell__label">{{ it.label }}</div><div><span class="statcell__num">{{ xgrz[it.key] }}</span><span class="statcell__unit">次</span></div></div>
+                <div class="info-row"><span class="info-row__label">学年</span><span class="info-row__value">{{ r.xn || '—' }}</span></div>
+                <div class="info-row"><span class="info-row__label">开始日期</span><span class="info-row__value">{{ r.ksrq || '—' }}</span></div>
+                <div class="info-row"><span class="info-row__label">结束日期</span><span class="info-row__value">{{ r.jsrq || '—' }}</span></div>
               </div>
             </div>
           </div>
-
-          <div id="sec-czrz" class="section">
-            <div class="sec-head">
-              <div class="section__head"><span class="section__title">操作及审核日志</span><span class="section__bar"></span></div>
-              <div v-if="czrz.length" class="count-chip">共&nbsp;<span class="count-chip__num">{{ czrz.length }}</span>&nbsp;条</div>
-            </div>
-            <div v-if="!czrz.length" class="empty-card">暂无操作日志</div>
-            <div v-else class="timeline">
-              <div v-for="(row, i) in czrz" :key="i" class="tl" :class="{ 'tl--last': i === czrz.length - 1 }">
-                <div class="tl__rail">
-                  <div class="tl__dot" :class="'tl__dot--' + shztMeta(row.shzt).tone">{{ i + 1 }}</div>
-                  <div v-if="i !== czrz.length - 1" class="tl__line"></div>
-                </div>
-                <div class="tl__body">
-                  <div class="tl__top"><span class="tl__name">{{ row.xgmk || '—' }}</span><span class="st-chip" :class="'st-chip--' + shztMeta(row.shzt).tone">{{ shztMeta(row.shzt).label }}</span></div>
-                  <span class="tl__meta">{{ row.xgr || '—' }} 修改 {{ row.xgsj || '' }}</span>
-                  <span v-if="row.shrr || row.shsj" class="tl__meta">{{ reviewerLine(row) }}</span>
-                  <div v-if="row.shyj" class="tl__opinion">审核意见：{{ row.shyj }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </template>
+        <div v-else class="empty-card">当前账号不在班导师名单中</div>
         <teleport defer to=".phone">
           <div class="detail-foot">
             <div class="foot-btn foot-btn--ghost" @click="back">返回</div>
-            <div class="foot-btn foot-btn--primary" @click="backToTop">回到顶部</div>
+            <div v-if="row" class="foot-btn foot-btn--primary" @click="cert">导出证明</div>
           </div>
         </teleport>
       </div>`,
   };
+
 
   /* ---------------- 学生详情 xsxq ---------------- */
   const XSXQ_TABS = [
@@ -683,7 +518,7 @@
     '/home': { comp: MHome, title: '首页', tab: true },
     '/my': { comp: MMy, title: '我的', tab: true },
     '/drill': { comp: MDrill, title: q => (DRILL_META[q.scope === 'xsrs' ? 'xsrs' : 'xgdw'] || {}).title },
-    '/fdydetail': { comp: MFdyDetail, title: q => (String(q.rylx) === '4' ? '班导师详情' : '辅导员详情'), noTabbar: true },
+    '/fdydetail': { comp: MFdyDetail, title: '班导师详情', noTabbar: true },
     '/xsxq': { comp: MXsxq, title: '学生详情' },
   };
 
